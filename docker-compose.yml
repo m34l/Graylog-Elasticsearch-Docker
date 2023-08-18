@@ -1,0 +1,46 @@
+version: '3'
+services:
+  graylog:
+    image: graylog/graylog:4.1
+    container_name: graylog
+    environment:
+      - GRAYLOG_ROOT_PASSWORD=yourpassword
+      - GRAYLOG_MONGODB_URI=mongodb://mongo:27017/graylog
+      # Add other Graylog configuration variables here
+    ports:
+      - "9000:9000"
+      - "1514:1514"
+      - "1514:1514/udp"
+      - "1515:1515"
+      - "1515:1515/udp"
+      - "12201:12201"
+      - "12201:12201/udp"
+      - "5044:5044"
+    volumes:
+      - graylog_journal:/usr/share/graylog/data/journal       
+    depends_on:
+      - elasticsearch
+      - mongo
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      # Add other ElasticSearch configuration variables here
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+      - ./elasticsearch/config:/usr/share/elasticsearch/config
+
+  mongo:
+    image: mongo:4.4
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongodb:/data/db
+
+volumes:
+  graylog_journal:
